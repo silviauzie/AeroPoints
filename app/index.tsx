@@ -1,38 +1,72 @@
-import { router } from "expo-router";
-import { StatusBar } from "expo-status-bar";
-import React, { useEffect } from "react";
-import { Image, Pressable, StyleSheet } from "react-native";
+import { useRouter } from "expo-router";
+import * as SplashScreen from "expo-splash-screen";
+import React from "react";
+import { ActivityIndicator, Image, StyleSheet, Text, View } from "react-native";
 
-const SPLASH_MS = 2000;
+const BRAND_RED = "#CD0100";
 
-export default function index() {
-  useEffect(() => {
-    const t = setTimeout(() => {
-      router.replace("/SignInSignUp");
-    }, SPLASH_MS);
-    return () => clearTimeout(t);
-  }, []);
+async function getInitialPath(): Promise<"/SignInSignUp" | "/(main)/home"> {
+  /**
+   * You don’t have persisted auth/session state yet.
+   * For now: always start in auth/onboarding.
+   *
+   * When you add real auth:
+   * - return "/(main)/home" if user/session exists
+   * - otherwise return "/SignInSignUp"
+   */
+  return "/SignInSignUp";
+}
+
+export default function Index() {
+  const router = useRouter();
+
+  React.useEffect(() => {
+    let cancelled = false;
+
+    (async () => {
+      const next = await getInitialPath();
+      if (cancelled) return;
+
+      // Ensure the native splash is gone before we replace routes.
+      // (If you later call `SplashScreen.preventAutoHideAsync()`, this still works.)
+      await SplashScreen.hideAsync().catch(() => undefined);
+      router.replace(next);
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [router]);
 
   return (
-    <Pressable
-      style={styles.container}
-      onPress={() => router.replace("/SignInSignUp")}
-    >
-      {/* <Text>home</Text> */}
-      <StatusBar style="light" />
+    <View style={styles.container}>
       <Image
         source={require("../assets/images/WhiteLogoForReactProject.png")}
-        style={{ width: 200, height: 200 }}
+        style={styles.logo}
       />
-    </Pressable>
+      <Text style={styles.title}>AeroPoints</Text>
+      <ActivityIndicator size="small" color="#FFFFFF" />
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#CD0100",
+    justifyContent: "center",
+    padding: 24,
+    backgroundColor: BRAND_RED,
+  },
+  logo: {
+    width: 140,
+    height: 140,
+    marginBottom: 12,
+  },
+  title: {
+    color: "#FFFFFF",
+    fontSize: 18,
+    fontWeight: "600",
+    marginBottom: 18,
   },
 });
