@@ -1,7 +1,7 @@
-import { Stack } from "expo-router";
+import { Stack, useRouter } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
-import React from "react";
+import React, { useEffect } from "react";
 
 // Set the animation options. This is optional.
 SplashScreen.setOptions({
@@ -10,6 +10,16 @@ SplashScreen.setOptions({
 });
 
 export default function _layout() {
+  const router = useRouter();
+  const isAuth = false;
+  useEffect(() => {
+    if (!isAuth) {
+      // Route groups like "(auth)" are not part of the URL path.
+      router.replace("/login");
+    } else {
+      router.replace("/home");
+    }
+  }, []);
   return (
     <React.Fragment>
       <StatusBar style="auto" />
@@ -18,14 +28,8 @@ export default function _layout() {
           headerShown: false,
         }}
       >
-        <Stack.Screen name="index" />
-        <Stack.Screen
-          name="SignInSignUp"
-          options={{
-            animation: "fade",
-          }}
-        />
         <Stack.Screen name="(main)" />
+        <Stack.Screen name="(auth)" />
       </Stack>
     </React.Fragment>
   );
